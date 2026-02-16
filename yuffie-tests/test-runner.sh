@@ -48,9 +48,14 @@ run_test() {
   local output_file="$RUN_DIR/${test_name}.out"
   local result_file="$RUN_DIR/${test_name}.result"
 
-  # Source the test to get PROMPT and CHECK function
-  unset PROMPT CHECK_FN DESCRIPTION EXPECTED_TOOLS
+  # Source the test to get PROMPT, CHECK_FN, and optional SETUP_FN/TEARDOWN_FN
+  unset PROMPT CHECK_FN DESCRIPTION EXPECTED_TOOLS SETUP_FN TEARDOWN_FN
   source "$test_file"
+
+  # Run setup if defined
+  if type SETUP_FN &>/dev/null; then
+    SETUP_FN
+  fi
 
   echo -n "  $test_name: $DESCRIPTION ... "
 
@@ -77,6 +82,11 @@ run_test() {
   local check_result
   check_result=$(CHECK_FN "$output" 2>&1)
   local check_exit=$?
+
+  # Run teardown if defined
+  if type TEARDOWN_FN &>/dev/null; then
+    TEARDOWN_FN
+  fi
 
   if [ $check_exit -eq 0 ]; then
     echo "PASS (${duration}s)"

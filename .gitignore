@@ -2,3 +2,6 @@
 *.swp
 *.swo
 *~
+
+# Yuffie test results (raw outputs contain tokens/session data)
+yuffie-tests/results/

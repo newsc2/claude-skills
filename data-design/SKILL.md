@@ -5,7 +5,7 @@ description: "Use this skill whenever creating any data visualization, chart, da
 
 # Editorial Data Visualization Design System
 
-Enforces Economist/FT-quality output across all charts and data graphics. Apply by default.
+Enforces editorial-quality output (FT, Economist, Tufte, Duarte) across all charts and data graphics. Apply by default.
 
 ## Architecture
 
@@ -20,12 +20,12 @@ The **composition helpers** below are the core of this skill. They MUST be used.
 
 ## CRITICAL: Why Charts Look Amateur Without Composition
 
-Applying tokens (nice colors, font sizes) is necessary but NOT sufficient. The Economist look comes from **6 structural elements working as a complete composition**. Without ALL 6, charts look like "matplotlib with nice colors" — not editorial.
+Applying tokens (nice colors, font sizes) is necessary but NOT sufficient. Editorial quality comes from **structural elements working as a complete composition**. Without them, charts look like "matplotlib with nice colors" — not editorial.
 
 ### Chart Anatomy
 
 ```
- ▬▬▬▬                                              ← 1. RED ACCENT BAR
+ ▬▬▬▬                                              ← 1. ACCENT BAR (project theme color)
  Bold serif headline that                           ← 2. TITLE (serif, bold, 18pt)
  states the insight clearly                            insight-driven, not descriptive
 
@@ -48,7 +48,7 @@ Applying tokens (nice colors, font sizes) is necessary but NOT sufficient. The E
 
 ## 11 Non-Negotiable Defaults
 
-1. **Red accent bar**: `#E6522C` rectangle above headline — THE signature element
+1. **Accent bar** (recommended): Small rectangle above headline in the project's primary color (`cat_1` by default). Adds editorial polish — use on most charts, skip for quick exploratory plots.
 2. **Title font**: SERIF (Lora → Georgia), bold, left-aligned — NEVER sans-serif for headlines
 3. **Title content**: States the INSIGHT ("Revenue surged 40%"), not topic ("Revenue by Quarter")
 4. **Subtitle**: Sans-serif, regular weight, `#555555` — data description (units, period, geography)
@@ -120,14 +120,17 @@ Do NOT use `tight_layout()` or `constrained_layout` — this function manages sp
 
 ```python
 def editorial_finish(fig, ax, title, subtitle=None, source=None,
-                     credit=None, accent_color="#E6522C"):
-    """Apply full Economist-style composition to a matplotlib chart."""
+                     credit=None, accent_color="#0D7680", accent=True):
+    """Apply editorial-style composition to a matplotlib chart.
+    accent_color: defaults to cat_1 (teal). Set to project theme color.
+    accent: set False to skip the accent bar (e.g. quick exploratory plots).
+    """
     left, right = 0.10, 0.92
 
     # ── Dynamic title block positioning ──
     n_title_lines = title.count('\n') + 1
     accent_y = 0.96
-    title_y = accent_y - 0.018
+    title_y = (accent_y - 0.018) if accent else accent_y
     subtitle_y = title_y - (n_title_lines * 0.05) - 0.012
     if subtitle:
         axes_top = subtitle_y - 0.05
@@ -140,12 +143,13 @@ def editorial_finish(fig, ax, title, subtitle=None, source=None,
     is_warm = bg[0] > 0.95 and bg[1] < 0.96 and bg[2] < 0.92
     grid_color = "#E4D9D0" if is_warm else "#D4D4D4"
 
-    # ── Red accent bar ──
-    fig.add_artist(plt.Rectangle(
-        (left, accent_y), 0.04, 0.006,
-        transform=fig.transFigure,
-        facecolor=accent_color, edgecolor="none", clip_on=False
-    ))
+    # ── Accent bar (project theme color) ──
+    if accent:
+        fig.add_artist(plt.Rectangle(
+            (left, accent_y), 0.04, 0.006,
+            transform=fig.transFigure,
+            facecolor=accent_color, edgecolor="none", clip_on=False
+        ))
 
     # ── Title: serif, bold ──
     fig.text(left, title_y, title,
@@ -223,7 +227,7 @@ def label_bars(ax, fmt="{:.0f}", padding=4, fontsize=11, color="#555555"):
 ```python
 COLORS = {
     "bg_warm": "#FFF1E5", "bg_white": "#FFFFFF",
-    "accent": "#E6522C",
+    "accent": "#0D7680",  # same as cat_1; override per project
     "text": "#222222", "text_muted": "#555555", "text_light": "#707071",
     "grid": "#D4D4D4", "grid_warm": "#E4D9D0", "axis": "#BBBBBB",
     "cat_1": "#0D7680", "cat_2": "#E6522C", "cat_3": "#2E6E9E",

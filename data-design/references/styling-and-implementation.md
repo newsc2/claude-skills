@@ -106,10 +106,12 @@ These aren't arbitrary rules — each traces back to a core design principle:
 
 ## Chart Conventions (12 decisions)
 
-### 1. Red Accent Bar (THE signature element)
-- Small rectangle, `#E6522C`, positioned above the headline
+### 1. Accent Bar (recommended, not mandatory)
+- Small rectangle positioned above the headline, in the project's primary/theme color
+- Defaults to `cat_1` (#0D7680 teal). Override via `accent_color` param.
 - ~4% of chart width, ~0.6% of chart height
-- Immediately signals "editorial data viz" — differentiates from generic matplotlib
+- Signals "editorial data viz" — differentiates from generic matplotlib
+- Skip with `accent=False` for quick exploratory plots
 - Handled automatically by `editorial_finish()`
 
 ### 2. Gridlines
@@ -234,11 +236,11 @@ fig.add_annotation(
     font=dict(family="Inter, Helvetica, sans-serif", size=14, color="#555555"),
     showarrow=False, xanchor="left"
 )
-# Red accent bar as a shape
+# Accent bar as a shape (use project theme color)
 fig.add_shape(
     type="line", x0=0, x1=0.06, y0=1.15, y1=1.15,
     xref="paper", yref="paper",
-    line=dict(color="#E6522C", width=4)
+    line=dict(color="#0D7680", width=4)  # default teal; override per project
 )
 ```
 
@@ -249,7 +251,7 @@ fig.add_shape(
 ```css
 :root {
   --viz-bg:          #FFF1E5;
-  --viz-accent:      #E6522C;
+  --viz-accent:      var(--viz-cat-1);  /* project theme color */
   --viz-text:        #222222;
   --viz-text-muted:  #555555;
   --viz-text-light:  #707071;

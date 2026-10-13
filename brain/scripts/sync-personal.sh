@@ -16,7 +16,7 @@ REMOTE="/Users/newsc2/Projects/personal/"
 LOCAL="$HOME/Projects/personal/"
 STAMP="$HOME/.claude/.personal-sync-stamp"
 MAX_DELETE="${PERSONAL_SYNC_MAX_DELETE:-25}"
-EXCL=(--exclude '.DS_Store' --exclude '.claude/' --exclude '__pycache__/' --exclude '.venv/')
+EXCL=(--exclude '.DS_Store' --exclude '.claude/' --exclude '.omc/' --exclude '__pycache__/' --exclude '.venv/')
 RS=(rsync -rltp --itemize-changes "${EXCL[@]}" -e "ssh -o ConnectTimeout=10")
 
 [ -d "$LOCAL" ] || { echo "no laptop copy at $LOCAL" >&2; exit 2; }
@@ -26,13 +26,13 @@ changed_since_stamp() {
   # Laptop files created or modified since the last sync. ctime, not mtime, so files copied in with
   # preserved timestamps (rsync -t, exports) still count as new.
   [ -f "$STAMP" ] || { echo "no sync stamp at $STAMP; run 'push' once to create it" >&2; return 1; }
-  (cd "$LOCAL" && find . -type f -cnewer "$STAMP" ! -name .DS_Store ! -path './.claude/*' \
+  (cd "$LOCAL" && find . -type f -cnewer "$STAMP" ! -name .DS_Store ! -path './.claude/*' ! -path '*/.omc/*' \
       ! -path '*/__pycache__/*' ! -path '*/.venv/*' | sed 's#^\./##' | sort)
 }
 
 do_push() {
   local list
-  if [ -f "$STAMP" ]; then list=$(changed_since_stamp); else list=$(cd "$LOCAL" && find . -type f ! -name .DS_Store ! -path './.claude/*' | sed 's#^\./##' | sort); fi
+  if [ -f "$STAMP" ]; then list=$(changed_since_stamp); else list=$(cd "$LOCAL" && find . -type f ! -name .DS_Store ! -path './.claude/*' ! -path '*/.omc/*' | sed 's#^\./##' | sort); fi
   if [ -z "$list" ]; then echo "push: nothing changed on the laptop since the last sync"; touch "$STAMP"; return 0; fi
   echo "push: $(printf '%s\n' "$list" | wc -l | tr -d ' ') laptop file(s) changed since the last sync"
   printf '%s\n' "$list" | "${RS[@]}" --update --files-from=- "$LOCAL" "$HOST:$REMOTE" | grep -v '^\.d' | sed 's/^/  /' || true

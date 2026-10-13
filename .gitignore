@@ -6,3 +6,6 @@
 # Yuffie test results (raw outputs contain tokens/session data)
 yuffie-tests/results/
 .omc/
+
+# skills synced from claude.ai (machine-local)
+synced/
